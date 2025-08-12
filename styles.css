@@ -1,0 +1,240 @@
+/* Base Styles and Variables */
+:root {
+    --primary-color: #3b82f6;
+    --secondary-color: #764ba2;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --background-light: #ffffff;
+    --background-dark: #1a1a1a;
+}
+
+/* Dark Mode Styles */
+.dark-mode {
+    --text-primary: #f3f4f6;
+    --text-secondary: #d1d5db;
+    --background-light: #2a2a2a;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Base Typography */
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-primary);
+    line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Enhanced Button Styles */
+.btn-primary {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg
+    transition-all duration-300 transform hover:scale-105 hover:shadow-lg
+    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+    active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+    flex items-center justify-center space-x-2;
+}
+
+.btn-secondary {
+    @apply bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg
+    transition-all duration-300 hover:bg-gray-200
+    focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50
+    active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+    flex items-center justify-center space-x-2;
+}
+
+.btn-outline {
+    @apply border-2 border-blue-600 text-blue-600 font-semibold py-3 px-6 rounded-lg
+    transition-all duration-300 hover:bg-blue-50
+    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+    active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+    flex items-center justify-center space-x-2;
+}
+
+/* Enhanced Option Button Styles */
+.option-button {
+    @apply w-full text-left p-4 rounded-lg border-2 transition-all duration-300
+    hover:shadow-md relative overflow-hidden
+    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+}
+
+.option-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.option-button:hover::before {
+    opacity: 0.05;
+}
+
+.option-button.selected {
+    @apply border-blue-600 bg-blue-50;
+    animation: pulse 2s infinite;
+}
+
+.option-button.correct {
+    @apply border-green-600 bg-green-50;
+}
+
+.option-button.wrong {
+    @apply border-red-600 bg-red-50;
+}
+
+/* Animation Keyframes */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+@keyframes score-animation {
+    from {
+        stroke-dashoffset: 600;
+    }
+    to {
+        stroke-dashoffset: var(--score-offset);
+    }
+}
+
+/* Progress Bar Enhancement */
+.progress-container {
+    @apply overflow-hidden rounded-full bg-gray-200;
+    height: 8px;
+}
+
+.progress-bar {
+    @apply h-full transition-all duration-500 ease-out;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+/* Score Circle Enhancement */
+.score-circle-wrapper {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+.score-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--primary-color) var(--percentage),
+        #e5e7eb 0
+    );
+    transition: background 1s ease;
+}
+
+/* Toast Notifications */
+.toast {
+    @apply fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-md;
+    z-index: 1000;
+}
+
+.toast.success {
+    @apply border-l-4 border-green-500;
+}
+
+.toast.error {
+    @apply border-l-4 border-red-500;
+}
+
+/* Responsive Design Enhancements */
+@media (max-width: 640px) {
+    .container {
+        @apply px-4;
+    }
+
+    .btn-primary, .btn-secondary, .btn-outline {
+        @apply py-2 px-4 text-sm;
+    }
+
+    .score-circle-wrapper {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* Dark Mode Specific Styles */
+.dark-mode .bg-white {
+    @apply bg-gray-800;
+}
+
+.dark-mode .text-gray-800 {
+    @apply text-gray-100;
+}
+
+.dark-mode .text-gray-600 {
+    @apply text-gray-300;
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+.focus-visible:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-opacity-50;
+}
+
+/* Loading Animation */
+.loading-animation {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Perspective Card Effect */
+.perspective-card {
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+}
+
+.perspective-card:hover {
+    transform: rotateX(2deg) rotateY(2deg);
+}
+
+/* Custom Animations */
+.animate-expand {
+    animation: expand 0.7s ease-out forwards;
+}
+
+@keyframes expand {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
