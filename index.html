@@ -1,292 +1,435 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduSijaExpert - Interactive Quiz</title>
-    
-    <!-- Meta tags for better SEO and sharing -->
-    <meta name="description" content="Test your knowledge with EduSijaExpert - An interactive quiz platform">
-    <meta name="keywords" content="quiz, education, learning, interactive quiz">
-    <meta property="og:title" content="EduSijaExpert - Interactive Quiz">
-    <meta property="og:description" content="Challenge yourself with our interactive quiz platform">
-    
-    <!-- Preload critical assets -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Animation Libraries -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <!-- Custom CSS -->
-    <link href="styles.css" rel="stylesheet">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EduSijaExpert - Interactive Quiz</title>
+  <meta name="description" content="Test your knowledge with EduSijaExpert - An interactive quiz platform" />
+  <link rel="icon" href="favicon.png" />
 
-    <style>
-        /* Critical CSS for faster initial render */
-        body {
-            font-family: 'Poppins', sans-serif;
-            opacity: 0;
-            transition: opacity 0.5s ease-in;
-        }
-        body.loaded {
-            opacity: 1;
-        }
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease-out;
-        }
-        .loading-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-    </style>
+  <!-- Fonts & styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+  <style>
+    :root{
+      --primary: #4f46e5; /* indigo-600 */
+      --accent: #8b5cf6;  /* purple-500 */
+    }
+    body{font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#f0f7ff,#f9f5ff); margin:0; color:#0f172a;}
+    .loading-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);z-index:60}
+    .loading-screen.hidden{opacity:0;pointer-events:none;transition:opacity .4s}
+    .card{background:rgba(255,255,255,0.9);backdrop-filter: blur(6px);border-radius:18px;box-shadow:0 8px 30px rgba(2,6,23,.08)}
+    .option-btn{border:1.5px solid #e6e9ef;padding:12px;border-radius:10px;cursor:pointer;transition:all .18s;user-select:none}
+    .option-btn:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(15,23,42,.06)}
+    .option-btn.selected{background:linear-gradient(90deg,var(--primary),var(--accent));color:white;border-color:transparent}
+    .btn {display:inline-flex;align-items:center;gap:.6rem;padding:.6rem .95rem;border-radius:10px;font-weight:600;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--primary),var(--accent));color:white;border:none}
+    .btn-ghost{background:transparent;border:1px solid #e6e9ef}
+    .progress-track{height:10px;background:#eef2ff;border-radius:999px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0;transition:width .45s ease}
+    .timer-bar{height:6px;background:#fde68a;border-radius:999px;transition:width .2s linear}
+    /* transitions between cards */
+    .fade-enter{opacity:0;transform:translateY(8px)}
+    .fade-enter.fade-enter-active{opacity:1;transform:none;transition:all .32s ease-out}
+    .fade-exit{opacity:1}
+    .fade-exit.fade-exit-active{opacity:0;transform:translateY(-6px);transition:all .28s ease-in}
+    /* responsive */
+    @media (max-width:640px){ .container{padding:1rem;} .card{border-radius:14px} }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
-    <!-- Loading Screen -->
-    <div class="loading-screen">
-        <div class="animate__animated animate__pulse animate__infinite">
-            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-            </svg>
-        </div>
+<body>
+  <!-- Loading -->
+  <div class="loading-screen" id="loadingScreen" aria-hidden="true">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6">
+      <path d="M12 2v4M20.485 3.515l-2.828 2.828M22 12h-4M20.485 20.485l-2.828-2.828M12 22v-4M3.515 20.485l2.828-2.828M2 12h4M3.515 3.515l2.828 2.828"/>
+    </svg>
+  </div>
+
+  <main class="container mx-auto px-6 py-10 max-w-3xl">
+    <!-- theme toggle -->
+    <div class="flex justify-end mb-4">
+      <button id="themeToggle" class="btn btn-ghost" aria-pressed="false" title="Toggle theme">🌙 Theme</button>
     </div>
 
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8 relative">
-        <!-- Floating Navigation -->
-        <nav class="fixed top-4 right-4 z-50">
-            <button id="theme-toggle" class="p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                </svg>
-            </button>
-        </nav>
+    <!-- Header -->
+    <header class="text-center mb-8" data-aos="fade-down">
+      <h1 class="text-3xl sm:text-5xl font-extrabold bg-clip-text text-transparent" style="background-image:linear-gradient(90deg,var(--primary),var(--accent))">
+        EduSijaExpert
+      </h1>
+      <p class="mt-2 text-gray-600">Challenge yourself — instant result, review answers, and share!</p>
+    </header>
 
-        <!-- Header Section -->
-        <header class="text-center mb-10" data-aos="fade-down" data-aos-duration="1000">
-            <div class="inline-block">
-                <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent pb-2">
-                    EduSijaExpert
-                </h1>
-                <div class="h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transform scale-x-0 transition-transform duration-700 animate-expand"></div>
-            </div>
-            <p class="text-gray-600 text-lg mt-4 animate__animated animate__fadeIn animate__delay-1s">
-                Challenge Your Knowledge, Expand Your Mind
-            </p>
-        </header>
-
-        <!-- Quiz Container -->
-        <div class="max-w-2xl mx-auto">
-            <!-- Welcome Screen -->
-            <div id="welcome-screen" class="transform perspective-card" data-aos="zoom-in">
-                <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-8 hover:shadow-2xl transition-all duration-300">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4 animate__animated animate__fadeInUp">
-                        Welcome to EduSijaExpert Quiz!
-                    </h2>
-                    <p class="text-gray-600 mb-6 animate__animated animate__fadeInUp animate__delay-1s">
-                        Ready to challenge yourself? Test your knowledge with our carefully curated questions spanning various topics.
-                    </p>
-                    <div class="features grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div class="feature-item flex items-center space-x-3 animate__animated animate__fadeInUp animate__delay-2s">
-                            <span class="text-blue-500">✓</span>
-                            <span>8 Challenging Questions</span>
-                        </div>
-                        <div class="feature-item flex items-center space-x-3 animate__animated animate__fadeInUp animate__delay-2s">
-                            <span class="text-blue-500">✓</span>
-                            <span>Instant Results</span>
-                        </div>
-                        <div class="feature-item flex items-center space-x-3 animate__animated animate__fadeInUp animate__delay-2s">
-                            <span class="text-blue-500">✓</span>
-                            <span>Progress Tracking</span>
-                        </div>
-                        <div class="feature-item flex items-center space-x-3 animate__animated animate__fadeInUp animate__delay-2s">
-                            <span class="text-blue-500">✓</span>
-                            <span>Review Answers</span>
-                        </div>
-                    </div>
-                    <button id="start-quiz" class="btn-primary group">
-                        <span class="relative">
-                            Start Quiz
-                            <span class="absolute bottom-0 left-0 w-full h-0.5 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                        </span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Quiz Section -->
-            <div id="quiz-container" class="hidden">
-                <!-- Progress Bar -->
-                <div class="progress-container mb-6 overflow-hidden rounded-full bg-gray-200">
-                    <div class="progress h-2 relative">
-                        <div class="progress-bar bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-500 ease-out"></div>
-                    </div>
-                </div>
-
-                <!-- Question Card -->
-                <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8 mb-8 transform transition-all duration-500" data-aos="fade-up">
-                    <div class="question-header flex justify-between items-center mb-6">
-                        <div class="question-number text-sm font-medium text-gray-500">
-                            Question <span id="current-question" class="text-blue-600">1</span>
-                            <span class="text-gray-400">/8</span>
-                        </div>
-                        <div class="timer flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span id="timer" class="text-gray-600"></span>
-                        </div>
-                    </div>
-                    
-                    <h3 id="question" class="text-2xl font-semibold text-gray-800 mb-6 leading-relaxed"></h3>
-                    
-                    <div id="options" class="space-y-4">
-                        <!-- Options will be inserted here -->
-                    </div>
-                </div>
-
-                <!-- Navigation Buttons -->
-                <div class="flex justify-between items-center">
-                    <button id="prev-btn" class="btn-secondary hidden">
-                        <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                        Previous
-                    </button>
-                    <button id="next-btn" class="btn-primary ml-auto">
-                        Next
-                        <svg class="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Results Screen -->
-            <div id="results-screen" class="hidden">
-                <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8" data-aos="zoom-in">
-                    <div class="text-center">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-6">Quiz Completed! 🎉</h2>
-                        <div class="score-container relative mb-8">
-                            <div class="score-circle-wrapper">
-                                <div class="score-circle"></div>
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <div>
-                                        <div id="final-score" class="text-4xl font-bold text-blue-600">0/8</div>
-                                        <div class="text-gray-500 text-sm">Score</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="stats grid grid-cols-2 gap-4 mb-8">
-                            <div class="stat-item bg-gray-50 rounded-lg p-4">
-                                <div class="text-2xl font-bold text-green-500" id="correct-answers">0</div>
-                                <div class="text-sm text-gray-600">Correct</div>
-                            </div>
-                            <div class="stat-item bg-gray-50 rounded-lg p-4">
-                                <div class="text-2xl font-bold text-red-500" id="wrong-answers">0</div>
-                                <div class="text-sm text-gray-600">Wrong</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-col space-y-4">
-                            <button id="show-answers" class="btn-secondary">
-                                Review Answers
-                            </button>
-                            <button id="retry-quiz" class="btn-primary">
-                                Try Again
-                            </button>
-                            <button id="share-results" class="btn-outline">
-                                Share Results
-                                <svg class="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Welcome card -->
+    <section id="welcomeCard" class="card p-6 mb-6" data-aos="zoom-in">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-xl font-semibold">Welcome to EduSijaExpert Quiz</h2>
+          <p class="text-sm text-gray-600 mt-1">8 questions — timer per question, and share your score.</p>
         </div>
+        <div class="mt-3 sm:mt-0">
+          <button id="startBtn" class="btn btn-primary">Start Quiz ▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz container -->
+    <section id="quizArea" class="hidden">
+      <!-- progress -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between text-sm mb-2">
+          <div>Question <span id="qIndex">1</span>/<span id="qTotal">8</span></div>
+          <div id="timerLabel" class="text-sm text-gray-600">⏱ 00:30</div>
+        </div>
+        <div class="progress-track mb-2" aria-hidden="true"><div id="progFill" class="progress-fill"></div></div>
+        <div class="progress-track" style="height:6px;background:#f3f4f6;">
+          <div id="timerFill" class="timer-bar" style="width:100%"></div>
+        </div>
+      </div>
+
+      <!-- question card -->
+      <article id="questionCard" class="card p-6 mb-4 fade-enter-active" aria-live="polite" aria-atomic="true">
+        <h3 id="questionText" class="text-lg font-semibold mb-4">Question text</h3>
+        <div id="optionsList" class="grid gap-3"></div>
+      </article>
+
+      <!-- nav -->
+      <div class="flex items-center justify-between gap-4">
+        <button id="prevBtn" class="btn btn-ghost" aria-hidden="true">◀ Previous</button>
+        <div class="flex gap-3 ml-auto">
+          <button id="skipBtn" class="btn btn-ghost">Skip</button>
+          <button id="nextBtn" class="btn btn-primary" disabled>Next ▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- results -->
+    <section id="resultsArea" class="hidden card p-6 mt-6" data-aos="zoom-in-up">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold mb-2">Quiz Completed 🎉</h2>
+        <div id="scoreLarge" class="text-4xl font-extrabold text-indigo-600 mb-1">0 / 8</div>
+        <div class="flex justify-center gap-6 mb-4">
+          <div><div id="correctCount" class="text-2xl font-semibold text-green-600">0</div><div class="text-xs text-gray-600">Correct</div></div>
+          <div><div id="wrongCount" class="text-2xl font-semibold text-red-600">0</div><div class="text-xs text-gray-600">Wrong</div></div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-3 mb-3">
+          <button id="reviewBtn" class="btn btn-ghost">Review Answers</button>
+          <button id="retryBtn" class="btn btn-primary">Try Again</button>
+        </div>
+
+        <div class="mt-3 text-sm text-gray-700">
+          <span>Share your result:</span>
+          <div class="inline-flex items-center gap-2 ml-2">
+            <button id="shareWA" class="btn btn-ghost" title="Share to WhatsApp">WhatsApp</button>
+            <button id="shareTW" class="btn btn-ghost" title="Share to Twitter">Twitter</button>
+            <button id="shareFB" class="btn btn-ghost" title="Share to Facebook">Facebook</button>
+            <button id="copyLink" class="btn btn-ghost" title="Copy share text">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- review modal (simple) -->
+    <div id="reviewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div class="card max-w-2xl w-full p-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-semibold">Review Answers</h3>
+          <button id="closeReview" class="btn btn-ghost">Close</button>
+        </div>
+        <div id="reviewList" style="max-height:60vh;overflow:auto"></div>
+      </div>
     </div>
+  </main>
 
-    <!-- Toast Notifications -->
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50"></div>
+  <!-- scripts -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration:700, once:true });
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
-    <script src="script.js"></script>
+    // --------- Data & state ----------
+    const QUESTIONS = [
+      { q: "What is 2 + 2?", opts: ["3","4","5","6"], a: 1 },
+      { q: "Capital city of France?", opts: ["Berlin","Madrid","Paris","Rome"], a: 2 },
+      { q: "HTML stands for?", opts: ["Hyper Text Markup Language","High Transfer Markup Line","Hyperlinks Text Meta Language","None"], a: 0 },
+      { q: "CSS is primarily for?", opts: ["Styling web pages","Backend logic","Database","Networking"], a: 0 },
+      { q: "Which language is client-side?", opts: ["PHP","Python","JavaScript","SQL"], a: 2 },
+      { q: "5 x 5 = ?", opts: ["10","20","25","30"], a: 2 },
+      { q: "Fastest land animal?", opts: ["Lion","Cheetah","Gazelle","Horse"], a: 1 },
+      { q: "Formula of water?", opts: ["CO2","H2O","O2","H2"], a: 1 }
+    ];
+    const PER_QUESTION_SECONDS = 30; // seconds per question
 
-    <script>
-        // Initialize animations and handle page load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize AOS
-            AOS.init({
-                duration: 800,
-                once: true,
-                mirror: false,
-                offset: 50
-            });
+    let idx = 0;
+    let selected = Array(QUESTIONS.length).fill(null);
+    let score = 0;
+    let timer = null;
+    let timeLeft = PER_QUESTION_SECONDS;
 
-            // Handle page load animation
-            setTimeout(() => {
-                document.body.classList.add('loaded');
-                document.querySelector('.loading-screen').classList.add('hidden');
-            }, 1000);
+    // --------- Elements ----------
+    const loadingScreen = document.getElementById('loadingScreen');
+    const welcomeCard = document.getElementById('welcomeCard');
+    const startBtn = document.getElementById('startBtn');
+    const quizArea = document.getElementById('quizArea');
+    const qIndexEl = document.getElementById('qIndex');
+    const qTotalEl = document.getElementById('qTotal');
+    const questionText = document.getElementById('questionText');
+    const optionsList = document.getElementById('optionsList');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const progFill = document.getElementById('progFill');
+    const timerFill = document.getElementById('timerFill');
+    const timerLabel = document.getElementById('timerLabel');
+    const resultsArea = document.getElementById('resultsArea');
+    const scoreLarge = document.getElementById('scoreLarge');
+    const correctCount = document.getElementById('correctCount');
+    const wrongCount = document.getElementById('wrongCount');
+    const reviewBtn = document.getElementById('reviewBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const reviewModal = document.getElementById('reviewModal');
+    const reviewList = document.getElementById('reviewList');
+    const closeReview = document.getElementById('closeReview');
+    const shareWA = document.getElementById('shareWA');
+    const shareTW = document.getElementById('shareTW');
+    const shareFB = document.getElementById('shareFB');
+    const copyLink = document.getElementById('copyLink');
+    const startTimeout = 700; // small delay to hide loading
 
-            // Theme toggle functionality
-            const themeToggle = document.getElementById('theme-toggle');
-            themeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('dark-mode');
-                // Save preference
-                localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-            });
+    // theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      const pressed = body.classList.contains('dark');
+      themeToggle.setAttribute('aria-pressed', pressed);
+      themeToggle.textContent = pressed ? '☀️ Light' : '🌙 Theme';
+    });
 
-            // Apply saved theme
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
-        });
+    // hide loading after DOM ready
+    window.addEventListener('load', () => {
+      setTimeout(()=> loadingScreen.classList.add('hidden'), startTimeout);
+    });
 
-        // Toast notification function
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type} animate__animated animate__fadeInUp`;
-            toast.innerHTML = `
-                <div class="toast-content">
-                    ${message}
-                </div>
-            `;
-            document.getElementById('toast-container').appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.replace('animate__fadeInUp', 'animate__fadeOutDown');
-                setTimeout(() => toast.remove(), 1000);
-            }, 3000);
+    // ---------- helpers ----------
+    function msToTime(s){
+      const m = Math.floor(s/60); const sec = s%60;
+      return (m>0?String(m).padStart(2,'0')+':':'') + String(sec).padStart(2,'0');
+    }
+
+    function resetTimer(){
+      clearInterval(timer);
+      timeLeft = PER_QUESTION_SECONDS;
+      timerFill.style.width = '100%';
+      timerLabel.textContent = `⏱ ${msToTime(timeLeft)}`;
+    }
+
+    function startTimer(){
+      resetTimer();
+      timer = setInterval(()=> {
+        timeLeft--;
+        const percent = Math.max(0, (timeLeft/PER_QUESTION_SECONDS)*100);
+        timerFill.style.width = percent + '%';
+        timerLabel.textContent = `⏱ ${msToTime(timeLeft)}`;
+        if(timeLeft <= 0){
+          clearInterval(timer);
+          // auto move forward and mark as null (treated as wrong)
+          handleNext(true);
         }
-    </script>
+      }, 1000);
+    }
+
+    // Render question & options (safe, no duplicate listeners)
+    function renderQuestion(){
+      const Q = QUESTIONS[idx];
+      qIndexEl.textContent = idx+1;
+      qTotalEl.textContent = QUESTIONS.length;
+      questionText.textContent = Q.q;
+
+      // animate fade: quick class swap
+      questionText.parentElement.classList.add('fade-enter');
+      requestAnimationFrame(()=> {
+        questionText.parentElement.classList.add('fade-enter-active');
+        setTimeout(()=> {
+          questionText.parentElement.classList.remove('fade-enter','fade-enter-active');
+        }, 350);
+      });
+
+      // build options
+      optionsList.innerHTML = '';
+      Q.opts.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.type = 'button';
+        btn.setAttribute('aria-pressed', selected[idx] === i ? 'true' : 'false');
+        btn.setAttribute('data-index', i);
+        btn.textContent = opt;
+        // if already selected, show selected
+        if(selected[idx] === i) btn.classList.add('selected');
+        // single listener per created element
+        btn.addEventListener('click', () => {
+          // deselect siblings
+          Array.from(optionsList.children).forEach(c => {
+            c.classList.remove('selected');
+            c.setAttribute('aria-pressed','false');
+          });
+          btn.classList.add('selected');
+          btn.setAttribute('aria-pressed','true');
+          selected[idx] = i;
+          nextBtn.disabled = false;
+        });
+        optionsList.appendChild(btn);
+      });
+
+      // UI adjustments
+      prevBtn.style.visibility = idx === 0 ? 'hidden' : 'visible';
+      nextBtn.textContent = (idx === QUESTIONS.length-1) ? 'Finish' : 'Next';
+      nextBtn.disabled = selected[idx] === null;
+      // progress
+      const prog = ((idx)/QUESTIONS.length)*100;
+      progFill.style.width = prog + '%';
+      // start timer for this question
+      startTimer();
+    }
+
+    // handle next (auto param when timed out)
+    function handleNext(auto=false){
+      clearInterval(timer);
+      // If timed out and no selection, leave selected[idx] as null (counts wrong)
+      // If user pressed Next but no selection -> should be prevented by disabled button
+      if(!auto && selected[idx] === null) return; // safety
+      // If last question -> finish
+      if(idx === QUESTIONS.length-1){
+        // compute score
+        computeResults();
+        return;
+      }
+      // move to next
+      idx++;
+      renderQuestion();
+    }
+
+    function handlePrev(){
+      clearInterval(timer);
+      if(idx > 0) idx--;
+      renderQuestion();
+    }
+
+    function computeResults(){
+      clearInterval(timer);
+      // calculate score
+      score = 0;
+      for(let i=0;i<QUESTIONS.length;i++){
+        if(selected[i] === QUESTIONS[i].a) score++;
+      }
+      // update UI
+      quizArea.classList.add('hidden');
+      resultsArea.classList.remove('hidden');
+      scoreLarge.textContent = `${score} / ${QUESTIONS.length}`;
+      correctCount.textContent = score;
+      wrongCount.textContent = QUESTIONS.length - score;
+      // final progress to 100%
+      progFill.style.width = '100%';
+    }
+
+    // review content
+    function showReview(){
+      reviewList.innerHTML = '';
+      QUESTIONS.forEach((Q, i) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-3 p-3 rounded border';
+        const qh = document.createElement('div'); qh.innerHTML = `<strong>Q${i+1}.</strong> ${Q.q}`;
+        const your = document.createElement('div'); your.className = 'text-sm mt-1';
+        const sel = selected[i] !== null ? Q.opts[selected[i]] : '<em>Not answered</em>';
+        const correct = Q.opts[Q.a];
+        your.innerHTML = `Your answer: ${sel} ${selected[i] === Q.a ? '✅' : '❌'}<br/><span class="text-xs text-gray-600">Correct: ${correct}</span>`;
+        wrapper.appendChild(qh); wrapper.appendChild(your);
+        reviewList.appendChild(wrapper);
+      });
+      reviewModal.classList.remove('hidden');
+    }
+
+    // reset to welcome
+    function resetQuiz(){
+      idx = 0; selected = Array(QUESTIONS.length).fill(null);
+      score = 0;
+      resultsArea.classList.add('hidden');
+      welcomeCard.classList.remove('hidden');
+      quizArea.classList.add('hidden');
+      reviewModal.classList.add('hidden');
+      progFill.style.width = '0%';
+      timerFill.style.width = '100%';
+      timerLabel.textContent = `⏱ ${msToTime(PER_QUESTION_SECONDS)}`;
+    }
+
+    // share helpers
+    function getShareText(){
+      return `I scored ${score}/${QUESTIONS.length} on EduSijaExpert Quiz! Try it: ${location.href}`;
+    }
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert('Copied to clipboard');
+      }catch(e){
+        prompt('Copy this text:', text);
+      }
+    }
+
+    // ---------- event wiring ----------
+    startBtn.addEventListener('click', () => {
+      welcomeCard.classList.add('hidden');
+      resultsArea.classList.add('hidden');
+      quizArea.classList.remove('hidden');
+      idx = 0;
+      selected = Array(QUESTIONS.length).fill(null);
+      renderQuestion();
+    });
+
+    nextBtn.addEventListener('click', ()=> handleNext(false));
+    prevBtn.addEventListener('click', ()=> handlePrev());
+    skipBtn.addEventListener('click', ()=> { clearInterval(timer); handleNext(true); });
+
+    reviewBtn.addEventListener('click', showReview);
+    closeReview.addEventListener('click', ()=> reviewModal.classList.add('hidden'));
+    retryBtn.addEventListener('click', resetQuiz);
+
+    // share buttons
+    shareWA.addEventListener('click', ()=> {
+      const text = encodeURIComponent(getShareText());
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    });
+    shareTW.addEventListener('click', ()=> {
+      const text = encodeURIComponent(getShareText());
+      window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+    });
+    shareFB.addEventListener('click', ()=> {
+      const u = encodeURIComponent(location.href);
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${u}`, '_blank');
+    });
+    copyLink.addEventListener('click', ()=> copyToClipboard(getShareText()));
+
+    // prevent double-clicks on Next/Start
+    [startBtn, nextBtn, prevBtn, retryBtn, reviewBtn, skipBtn].forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        btn.disabled = true;
+        setTimeout(()=> btn.disabled = false, 500);
+      });
+    });
+
+    // keyboard accessibility: Enter to select focused option, arrow keys to navigate options
+    document.addEventListener('keydown', (ev)=>{
+      if(quizArea.classList.contains('hidden')) return;
+      if(ev.key === 'ArrowRight') { if(!nextBtn.disabled) nextBtn.click(); }
+      if(ev.key === 'ArrowLeft') { if(prevBtn.style.visibility !== 'hidden') prevBtn.click(); }
+    });
+
+    // Utility function exposed to template
+    function msToTime(s){
+      const m = Math.floor(s/60); const sec = s%60;
+      return (m>0 ? `${String(m).padStart(2,'0')}:` : '') + String(sec).padStart(2,'0');
+    }
+  </script>
 </body>
 </html>
